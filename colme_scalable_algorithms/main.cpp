@@ -18,28 +18,39 @@ int main() {
 
     std::string csv_header = "alg,graph,seed,n,int_avg_deg,sigma,alpha,up_to,epsilon,delta,init_s,alg_s";
 
+    // Experiment 1 - extended seed selection (20 seeds)
+    // std::vector<int> seed_list = {111, 222, 333, 444, 555, 666, 777, 888, 999, 101, 202, 303, 404, 505, 606, 707, 808, 909, 123, 456};
     
-    std::vector<int> seed_list = {111, 222, 333, 444, 555, 666, 777, 888, 999, 101,
-                                  202, 303, 404, 505, 606, 707, 808, 909, 123, 456};
+    // Experiment 2 - reduced seed set (10 seeds)
+    std::vector<int> seed_list = {111, 222, 333, 444, 555, 666, 777, 888, 999, 101};
 
     // std::string noise_distribution = "unif"; // "none" to have the "perfect" case
     std::string noise_distribution = "none";
 
+
+    // Experiment 1a - B-ColME
+    // std::vector<std::string> alg_vec = {"belief_propagation_v1"};
+
+    // Experiment 1b - C-ColME
+    // std::vector<std::string> alg_vec = {"consensus"};
+
+    // Experiment 2 - Algorithms Comparison
+    std::vector<std::string> alg_vec = {"belief_propagation_v1", "consensus", "colme", "colme_recompute"};
+
+
     // constant values across all the experiments
-    int n_nodes    = 1000;
+    int n_nodes    = 10000;
     int n_max_iter = 2000;
     
     std::vector<float> sigma_vec = {2.0f};
 
     float epsilon = 0.1f;
     float delta   = 0.1f;
-
-    std::vector<std::string> alg_vec = {"belief_propagation_v1", "consensus", "colme", "colme_recompute"};
     
     std::string g = "gnr";
 
     // specifics of the underlying collaborative graph
-    std::vector<float> p_vec = {0.01f};
+    std::vector<float> p_vec = {0.001f};
 
     // belief propagation
     std::vector<int> tab_ut_vec = {5};

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
+#include <iterator>
 
 namespace Helpers {
 

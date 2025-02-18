@@ -1,6 +1,6 @@
-# NOTE: if you run it without the 'quick_run' flag set it will do all the 't' iterations
-#       for the second half of the connections (concordant links), either do a 'quick_run'
-#       or appropriately choose the time horizon. 
+# NOTE: if you run it without the 'quick_run' flag set it will do all the 't'
+#       iterations for the second half of the connections (concordant links),
+#       either do a 'quick_run' or appropriately choose the time horizon. 
 
 import os
 import math
@@ -85,6 +85,12 @@ def parse_args():
         action='store_true',
         help='Use pairs and gamma as for the original ColME algorithm'
         )
+    parser.add_argument(
+        '--venv',
+        type=str,
+        default='.venv',
+        help='Custom name of the virtual environment within the folder'
+        )
 
     return parser.parse_args()
 
@@ -93,8 +99,27 @@ def beta_int(n_p, sigma_p, gamma_p):
 
     ln_v = math.log(math.sqrt(n_p + 1) / gamma_p)
     sqrt_v = math.sqrt((2/n_p) * (1+1/n_p) * ln_v)
-
     return sigma_p * sqrt_v
+
+
+def run_cc_size_est(cmd_sub_p, args_p, class_to_mu_p):
+
+    current_env = os.environ.copy()
+    result = subprocess.run(cmd_sub_p, env=current_env, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print("Error:", result.stderr)
+        raise RuntimeError('cc_size_est.py failed')
+    else:
+        print(result.stdout)
+        df = pd.read_csv('cc_size_est.csv')
+        avg_size = df.loc[(df['Nodes'] == args_p.nodes) &
+                        (df['Classes'] == len(class_to_mu_p)) &
+                        (df['r'] == args_p.r) & 
+                        (df['ER'] == True), 'AvgSize']
+        
+        CC_a = avg_size.values[0]
+        return CC_a
 
 
 
@@ -126,13 +151,16 @@ if __name__ == '__main__':
         avg_size = df.loc[(df['Nodes'] == args.nodes) &
                           (df['Classes'] == len(class_to_mu)) &
                           (df['r'] == args.r) & 
-                          (df['ER'] == True), 'AvgSize'] # TODO: manage 'True' ER
+                          (df['ER'] == True), 'AvgSize']
         if not avg_size.empty:
             CC_a = avg_size.values[0] * args.nodes
 
         else:
+            # it is needed to pass the path tothe executable in the environment so that the 
+            # subprocess can find it and use the current python version and dependencies
+            path_to_py = os.path.join('.', args.venv, 'Scripts', 'python')
             cmd_sub = [
-                'python', 'cc_size_est.py',
+                path_to_py, 'cc_size_est.py',
                 '--nodes', str(args.nodes),
                 '-r', str(args.r),
                 '--erdos-renyi',
@@ -140,25 +168,25 @@ if __name__ == '__main__':
                 ]
 
             if run_sub:
-                result = subprocess.run(cmd_sub, capture_output=True, text=True)
-
-                if result.returncode != 0:
-                    print("Error:", result.stderr)
-                    raise RuntimeError('cc_size_est.py failed')
-                else:
-                    df = pd.read_csv('cc_size_est.csv')
-                    avg_size = df.loc[(df['Nodes'] == args.nodes) &
-                                    (df['Classes'] == len(class_to_mu)) &
-                                    (df['r'] == args.r) & 
-                                    (df['ER'] == True), 'AvgSize']
-                    CC_a = avg_size.values[0]
+                run_cc_size_est(cmd_sub, args, class_to_mu)
 
             else:
                 cmd_str = ' '.join(cmd_sub)
 
             raise RuntimeError(f'Entry not found in cc_size_est.csv. Run:\n {cmd_str}')
-    else:
-        raise FileNotFoundError('cc_size_est.csv not found')
+    else:    
+        # it is needed to pass the path tothe executable in the environment so that the 
+        # subprocess can find it and use the current python version and dependencies
+        path_to_py = os.path.join('.', args.venv, 'Scripts', 'python')
+        cmd_sub = [
+            path_to_py, 'cc_size_est.py',
+            '--nodes', str(args.nodes),
+            '-r', str(args.r),
+            '--erdos-renyi',
+            '--num-trials', '50'
+            ]
+        CC_a = run_cc_size_est(cmd_sub, args, class_to_mu)
+
 
     gamma = args.delta / (4.0 * args.r * CC_a)
     
@@ -243,4 +271,3 @@ if __name__ == '__main__':
         )
 
     print(f"Simulation time: {time.time() - start:.2f} s")
-

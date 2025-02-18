@@ -836,15 +836,13 @@ public:
 			int prev_prog = -1;
 			std::vector<int> isolated_list {};
 
+			int num_of_links = num_directed_links(); // number of directed links in the graph
+
 			for(int iter=1; iter<max_iter; iter++) { // in init the node receive their first sample
 
 				for(int node=0; node<static_cast<int>(g.size()); node++) { // update all nodes
-
-					// WARNING: new chice of parametrization
-					/*int n_collab = n_nodes; // specifies what 'neighborhood info' to use to parametrize the confidence interval*/
 					
-					//int n_collab = n_nodes * int_avg_deg;
-					int n_collab = 4 * num_directed_links(); // 4*2*E
+					int n_collab = 4 * num_of_links; // 4*2*E
 					if (!all_collab) {
 						if (avg_collab)
 							n_collab = 4 * int_avg_deg;
@@ -1061,7 +1059,7 @@ public:
 		}
 
 
-	/************************************************** ALGORITHM 3 ***************************************************/
+	/************************************************** ALGORITHM 2 ***************************************************/
 
 		else if (alg == "consensus") { // NodeC
 
@@ -1081,13 +1079,16 @@ public:
 			int prev_prog = -1;
 			bool enter_learned = false;
 			int learnt_iter = 0;
+
+			int num_of_links = num_directed_links(); // number of directed links in the graph
+
 			for(int iter=1; iter<max_iter; iter++) { // in init the node receive their first sample
 
 				topological_change = false; // reset the flag
 
 				for(int node=0; node<static_cast<int>(g.size()); node++) { // update all nodes
 					
-					int n_collab = 4 * num_directed_links();
+					int n_collab = 4 * num_of_links; // 4*2*E
 					if (!all_collab) {
 						if (avg_collab)
 							n_collab = 4 * int_avg_deg;
@@ -1255,7 +1256,7 @@ public:
 		}
 
 
-	/************************************************** ALGORITHM 4 ***************************************************/
+	/************************************************** ALGORITHM 3 ***************************************************/
 
 		else if ((alg == "colme") || (alg == "colme_recompute")) { // NodeA
 

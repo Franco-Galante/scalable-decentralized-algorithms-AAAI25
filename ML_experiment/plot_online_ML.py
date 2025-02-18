@@ -2,6 +2,7 @@
 # ted and the accuracy results on the test have been downloaded from wandb as
 # 'accuracy_local-1.csv', 'accuracy_nocut-1.csv', 'accuracy_model-1.csv'
 
+import os
 from itertools import groupby
 from operator import itemgetter
 import pandas as pd
@@ -94,9 +95,9 @@ ax1.tick_params(axis='y', colors='blue')
 ax1.yaxis.set_major_locator(MaxNLocator(nbins=3))
 ax1.set_yticks([0.0, 0.5, 1.0])
 
-ax2.plot([np.nan] + df_local['run-5 - LOCAL Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:orange', label='Local')
-ax2.plot([np.nan] + df_nocut['run-5 - Model-NO-CUT Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:red', label='FL-SG')
-ax2.plot([np.nan] + df_model['run-5 - ML-C-COLME Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:green', label='FL-DG')
+ax2.plot([np.nan] + df_local['run-1 - LOCAL Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:orange', label='Local')
+ax2.plot([np.nan] + df_nocut['run-1 - Model-NO-CUT Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:red', label='FL-SG')
+ax2.plot([np.nan] + df_model['run-1 - ML-C-COLME Accuracy'].tolist(), linewidth=1.8, marker='', color='tab:green', label='FL-DG')
 ax2.set_ylabel(r'$\text{Accuracy [%]}$') # , labelpad=12
 ax2.set_ylim([0,100])
 
@@ -112,3 +113,8 @@ for ax in [ax1, ax2]:
         spine.set_color('#dddddd')
 plt.tight_layout()
 plt.show()
+
+if not os.path.exists('figs'):
+    os.makedirs('figs')
+fig.savefig(os.path.join('figs', 'ML_experiment.pdf'), bbox_inches='tight')
+fig.savefig(os.path.join('figs', 'ML_experiment.png'), bbox_inches='tight')

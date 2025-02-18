@@ -1,0 +1,5 @@
+logs/
+colme_scalable_algorithms/*.sbatch
+colme_scalable_algorithms/build/
+colme_scalable_algorithms/experiments/
+multidimensional_means/cc_size_est.csv

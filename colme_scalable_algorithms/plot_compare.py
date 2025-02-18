@@ -33,6 +33,7 @@ color_list = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
 
 args = parse_args()
 
+FONTSIZE = 16
 
 # default params to be used if more scenarios for each algorithm are present
 alpha_compare = 0.5
@@ -70,6 +71,10 @@ for subfolder in args.subfolder_list:
     
 df = pd.concat(df_list, ignore_index=True)
 
+algs_to_compare = df['alg'].unique()
+for alg in algs_to_compare:
+    n_seeds = df[df['alg'] == alg]['seed'].nunique()
+    print(f'{n_seeds} seeds for algorithm {n_seeds}')
 
 # COL: ['alg', 'seed', 'n', 'int_avg_deg', 'sigma', 'alpha', 'up_to', 'epsilon',
 #       'delta', 'iter', 'pe', 'pl', 'po', 'pc', 'lost_neigh', 'wrong_neigh']
@@ -138,7 +143,7 @@ color_dict = {
 
 
 # two plots one over the other, top: error probability, bottom: wrong neighbors
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6),
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 4.5),
                                 gridspec_kw={'height_ratios': [3, 1]},
                                 sharex=True)
 
@@ -207,24 +212,30 @@ for _, scenario in scenarios.iterrows():# loop over each scenario
 
     if args.log:
         ax1.set_yscale('log')
-        ax1.set_ylabel(r'$\mathrm{Error} \, \mathrm{Probability}$')
+        ax1.set_ylabel(r'$\mathrm{Wrong} \, \mathrm{Estimates}$', fontsize=FONTSIZE)
         ax1.set_ylim([1e-05, 1.5])
 
         if args.wrong_abs:
             ax2.set_ylim([-0.05, 1.1*(df_scenario['wrong_neigh_mean'].max())]) 
-            ax2.set_ylabel(r'$\mathrm{Wrong} \, \mathrm{Neighbors}$')
+            ax2.set_ylabel(r'$\mathrm{Wrong} \, \mathrm{Neighbors}$', fontsize=FONTSIZE)
 
         else:
             ax2.set_yscale('log')
             ax2.set_ylim([1e-05, 1.2])
-            ax2.set_ylabel(r'$\frac{\mathrm{Wrong} \, \mathrm{Neigh}}{\max(\mathrm{Wrong} \, \mathrm{Neigh})}$')
+            # ax2.set_ylabel(r'$\frac{\mathrm{Wrong} \, \mathrm{Neigh}}{\max(\mathrm{Wrong} \, \mathrm{Neigh})}$')
+            ax2.set_ylabel(r'$\mathrm{Wrong} \, \mathrm{Links}$', fontsize=FONTSIZE)
     else:
-        ax1.set_ylabel(r'$\mathrm{Success Probability}$')
+        ax1.set_ylabel(r'$\mathrm{Success Probability}$', fontsize=FONTSIZE)
 
 
-    ax2.set_xlabel(r'$\mathrm{Iterations}$') # shared y label
+    ax2.set_xlabel(r'$\mathrm{t}$', fontsize=FONTSIZE) # shared y label
 
     ax1.legend(loc='upper right')
 
 plt.tight_layout()
 plt.show()
+
+if not os.path.exists('figs'):
+    os.makedirs('figs')
+fig.savefig(os.path.join('figs', 'comparison.pdf'), bbox_inches='tight')
+fig.savefig(os.path.join('figs', 'comparison.png'), bbox_inches='tight')
